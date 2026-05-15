@@ -1,6 +1,6 @@
 # SQL 튜닝 실습 환경
 
-친절한 SQL 튜닝 학습을 위한 Docker 기반 PostgreSQL 실습 환경입니다.
+친절한 SQL 튜닝 학습을 위한 Docker 기반 PostgreSQL와 MySQL 실습 환경입니다.
 
 ## 테이블 구성
 
