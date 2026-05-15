@@ -6,18 +6,18 @@
 `SELECT * FROM orders WHERE status  = 'C' AND ordered_at >= '2023-01-01';`
 
 ## Step 1. 인덱스 없음
-`-------------------------------------------------------------------------------------------------------------
+```-------------------------------------------------------------------------------------------------------------
 Seq Scan on orders  (cost=0.00..4471.00 rows=24865 width=22) (actual time=0.021..10.335 rows=24978 loops=1)
 Filter: ((ordered_at >= '2023-01-01 00:00:00'::timestamp without time zone) AND (status = 'C'::bpchar))
 Rows Removed by Filter: 175022
 Planning Time: 0.083 ms
 Execution Time: 11.117 ms
 (5 rows)
-`
+```
 
 ## Step 2. [status + member_id]
 이 경우는 이미 다른 status + member_id를 인덱스로 사용하는 쿼리가 있는 상황이다.
-`-------------------------------------------------------------------------------------------------------------------------------------------------
+```-------------------------------------------------------------------------------------------------------------------------------------------------
 Bitmap Heap Scan on orders  (cost=1370.49..4345.19 rows=24865 width=22) (actual time=1.918..7.455 rows=24978 loops=1)
 Recheck Cond: (status = 'C'::bpchar)
 Filter: (ordered_at >= '2023-01-01 00:00:00'::timestamp without time zone)
@@ -28,11 +28,11 @@ Index Cond: (status = 'C'::bpchar)
 Planning Time: 0.061 ms
 Execution Time: 7.952 ms
 (9 rows)
-`
+```
 
 ## Step 3. [status + member_id + ordered_at]
 기존의 [status + member_id] 인덱스를 그대로 사용하면서 ordered_at을 추가했다.
-`-------------------------------------------------------------------------------------------------------------------------------------------------
+```-------------------------------------------------------------------------------------------------------------------------------------------------
 Bitmap Heap Scan on orders  (cost=2561.11..4405.08 rows=24865 width=22) (actual time=4.915..7.405 rows=24978 loops=1)
 Recheck Cond: ((status = 'C'::bpchar) AND (ordered_at >= '2023-01-01 00:00:00'::timestamp without time zone))
 Heap Blocks: exact=1471
@@ -41,11 +41,11 @@ Index Cond: ((status = 'C'::bpchar) AND (ordered_at >= '2023-01-01 00:00:00'::ti
 Planning Time: 0.061 ms
 Execution Time: 7.944 ms
 (7 rows)
-`
+```
 
 ## Step 4. [status + ordered_at]
 하지만 결국 [status + ordered_at]의 인덱스를 추가하는것이 최적이다.
-`-----------------------------------------------------------------------------------------------------------------------------------------------
+```-----------------------------------------------------------------------------------------------------------------------------------------------
 Bitmap Heap Scan on orders  (cost=643.29..2487.26 rows=24865 width=22) (actual time=1.314..3.502 rows=24978 loops=1)
 Recheck Cond: ((status = 'C'::bpchar) AND (ordered_at >= '2023-01-01 00:00:00'::timestamp without time zone))
 Heap Blocks: exact=1471
@@ -54,21 +54,21 @@ Index Cond: ((status = 'C'::bpchar) AND (ordered_at >= '2023-01-01 00:00:00'::ti
 Planning Time: 0.066 ms
 Execution Time: 4.015 ms
 (7 rows)
-`
+```
 
 ## Step 5. [status + ordered_at] 커버드 인덱스 사용 유도
 [status + ordered_at]을 그대로 사용하되, * 로 모든 컬럼을 가져오는 것이 아닌 인덱스의 컬럼만 가져오도록 쿼리를 변경한다.
 ### 쿼리
 `SELECT status, ordered_at FROM orders WHERE status  = 'C' AND ordered_at >= '2023-01-01';`
 
-`-----------------------------------------------------------------------------------------------------------------------------------------------------
+```-----------------------------------------------------------------------------------------------------------------------------------------------------
 Index Only Scan using idx_orders_status_ordered_at on orders  (cost=0.42..885.72 rows=24865 width=10) (actual time=0.027..1.882 rows=24978 loops=1)
 Index Cond: ((status = 'C'::bpchar) AND (ordered_at >= '2023-01-01 00:00:00'::timestamp without time zone))
 Heap Fetches: 0
 Planning Time: 0.072 ms
 Execution Time: 2.451 ms
 (5 rows)
-`
+```
 
 인덱스에서만 데이터를 가져올 수 있으므로 Index Only Scan이 발생했다.
 Heap Fetches: 0 -> Heap을 단 한번도 읽지 않음을 뜻한다.

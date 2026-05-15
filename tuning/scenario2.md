@@ -8,7 +8,7 @@ status가 C인 orders 데이터는 10만건이지만 X인 데이터는 1만건�
 또한 ordered_at을 2023-01-01에서 2023-12-01로 변경하여 조건에 맞는 데이터가 더 적어지도록 하였다.
 
 ## Step 1. [status + member_id]
-`---------------------------------------------------------------------------------------------------------------------------------------------
+```---------------------------------------------------------------------------------------------------------------------------------------------
 Bitmap Heap Scan on orders  (cost=138.72..1758.22 rows=201 width=22) (actual time=1.171..3.935 rows=213 loops=1)
 Recheck Cond: (status = 'X'::bpchar)
 Filter: (ordered_at >= '2023-12-01 00:00:00'::timestamp without time zone)
@@ -19,12 +19,12 @@ Index Cond: (status = 'X'::bpchar)
 Planning Time: 0.111 ms
 Execution Time: 3.976 ms
 (9 rows)
-`
+```
 
 Heap Blocks 1471개 탐색
 
 ## Step 2. [status + member_id + ordered_at]
-`-----------------------------------------------------------------------------------------------------------------------------------------------------
+```-----------------------------------------------------------------------------------------------------------------------------------------------------
 Bitmap Heap Scan on orders  (cost=255.47..811.25 rows=201 width=22) (actual time=1.034..1.594 rows=213 loops=1)
 Recheck Cond: ((status = 'X'::bpchar) AND (ordered_at >= '2023-12-01 00:00:00'::timestamp without time zone))
 Heap Blocks: exact=213
@@ -33,7 +33,7 @@ Index Cond: ((status = 'X'::bpchar) AND (ordered_at >= '2023-12-01 00:00:00'::ti
 Planning Time: 0.235 ms
 Execution Time: 1.660 ms
 (7 rows)
-`
+```
 
 Heap Blocks 213개 탐색
 
