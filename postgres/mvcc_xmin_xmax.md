@@ -151,6 +151,5 @@ PostgreSQL은 xmin과 xmax라는 개념을 사용하여 튜플에 대한 버전 
    - 새 튜플의 xmin  = UPDATE 트랜잭션 ID (live)
    - 즉, 같은 트랜잭션 ID가 기존 튜플의 xmax와 새 튜플의 xmin에 동시에 들어간다.
 
-4. 조회 시
 내가 읽을 수 있는 컬럼인지 아닌지, 내 트랜잭션 id와 xmin, xmax를 비교하여 가시성 체크(visibility check)를 한다.
 이후에 가시성 체크에 대해서 더 자세하게 알아보겠다.
